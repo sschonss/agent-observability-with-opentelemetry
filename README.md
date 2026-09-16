@@ -75,12 +75,22 @@ Add the plugin to `~/.config/opencode/opencode.json` while preserving your exist
 Enable only the local telemetry path in the shell where OpenCode will run:
 
 ```bash
+source examples/opencode-environment.sh
+opencode
+```
+
+The script exports:
+
+```bash
 export OPENCODE_ENABLE_TELEMETRY=1
 export OPENCODE_OTLP_ENDPOINT=http://localhost:4317
 export OPENCODE_OTLP_PROTOCOL=grpc
+export OPENCODE_OTLP_METRICS_INTERVAL=5000
 export OPENCODE_DISABLE_LOGS=1
 export OPENCODE_DISABLE_TRACES=all
 ```
+
+Use `source`, not `./examples/opencode-environment.sh`, because the variables must remain available in the same shell that starts OpenCode. If OpenCode is already open, close it and start it again from that terminal.
 
 The last two variables keep this first example focused on metrics and prevent prompt or trace payloads from entering the local stack. The adapter has options for logs and traces, but they should be enabled only after reviewing the data policy for the destination.
 
