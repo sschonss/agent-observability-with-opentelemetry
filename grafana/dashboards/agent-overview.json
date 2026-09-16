@@ -1,0 +1,89 @@
+{
+  "annotations": {"list": []},
+  "editable": false,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Sessions started",
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+      "targets": [{"expr": "sum(increase(agent_opencode_session_count_total{session_id=~\"$session_id\"}[1h]))", "refId": "A"}],
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "orientation": "auto", "textMode": "auto", "colorMode": "value"}
+    },
+    {
+      "type": "stat",
+      "title": "Assistant messages",
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+      "targets": [{"expr": "sum(increase(agent_opencode_message_count_total{session_id=~\"$session_id\"}[1h]))", "refId": "A"}],
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "orientation": "auto", "textMode": "auto", "colorMode": "value"}
+    },
+    {
+      "type": "stat",
+      "title": "Tool errors",
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+      "targets": [{"expr": "sum(increase(agent_opencode_tool_duration_milliseconds_count{success=\"false\",session_id=~\"$session_id\"}[1h]))", "refId": "A"}],
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "orientation": "auto", "textMode": "auto", "colorMode": "value"}
+    },
+    {
+      "type": "stat",
+      "title": "Retries",
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+      "targets": [{"expr": "sum(increase(agent_opencode_retry_count_total{session_id=~\"$session_id\"}[1h]))", "refId": "A"}],
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "orientation": "auto", "textMode": "auto", "colorMode": "value"}
+    },
+    {
+      "type": "timeseries",
+      "title": "Sessions and messages over time",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+      "targets": [
+        {"expr": "sum(rate(agent_opencode_session_count_total{session_id=~\"$session_id\"}[5m]))", "legendFormat": "sessions", "refId": "A"},
+        {"expr": "sum(rate(agent_opencode_message_count_total{session_id=~\"$session_id\"}[5m]))", "legendFormat": "messages", "refId": "B"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "ops"}, "overrides": []},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "multi"}}
+    },
+    {
+      "type": "timeseries",
+      "title": "Token usage by type",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+      "targets": [
+        {"expr": "sum by (type) (rate(agent_opencode_token_usage_total{session_id=~\"$session_id\"}[5m]))", "legendFormat": "{{type}}", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "multi"}}
+    },
+    {
+      "type": "timeseries",
+      "title": "Tool execution duration",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+      "targets": [
+        {"expr": "histogram_quantile(0.50, sum by (le) (rate(agent_opencode_tool_duration_milliseconds_bucket{session_id=~\"$session_id\"}[5m])))", "legendFormat": "p50", "refId": "A"},
+        {"expr": "histogram_quantile(0.95, sum by (le) (rate(agent_opencode_tool_duration_milliseconds_bucket{session_id=~\"$session_id\"}[5m])))", "legendFormat": "p95", "refId": "B"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "ms"}, "overrides": []},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "multi"}}
+    },
+    {
+      "type": "timeseries",
+      "title": "Session duration",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+      "targets": [
+        {"expr": "histogram_quantile(0.50, sum by (le) (rate(agent_opencode_session_duration_milliseconds_bucket{session_id=~\"$session_id\"}[5m])))", "legendFormat": "p50", "refId": "A"},
+        {"expr": "histogram_quantile(0.95, sum by (le) (rate(agent_opencode_session_duration_milliseconds_bucket{session_id=~\"$session_id\"}[5m])))", "legendFormat": "p95", "refId": "B"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "ms"}, "overrides": []},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "multi"}}
+    }
+  ],
+  "refresh": "15s",
+  "schemaVersion": 41,
+  "tags": ["ai-agent", "opentelemetry", "opencode"],
+  "templating": {"list": [{"name": "session_id", "label": "Session", "type": "query", "datasource": "Prometheus", "query": {"query": "label_values(agent_opencode_session_count_total, session_id)", "refId": "StandardVariableQuery"}, "includeAll": true, "allValue": ".*", "multi": true, "refresh": 2, "sort": 1}]},
+  "time": {"from": "now-6h", "to": "now"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Agent Observability Overview",
+  "uid": "agent-observability-overview",
+  "version": 1
+}
